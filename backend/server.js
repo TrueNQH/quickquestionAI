@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { sequelize } = require('./models');
-
+const ngrok = require('ngrok');  // Thêm ngrok
 const app = express();
 
 // Cấu hình CORS trước
@@ -54,11 +54,17 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log('Kết nối database thành công.');
 
-    await sequelize.sync();
-    console.log('Database đã sync.');
-
-    app.listen(PORT, () => {
+    // await sequelize.sync();
+    // console.log('Database đã sync.');
+    await sequelize.sync({ alter: true }).then(() => {
+      console.log("Database updated!");
+  }).catch(err => {
+      console.error("Error updating database:", err);
+  });
+    app.listen(PORT,async  () => {
       console.log(`Server đang chạy trên port ${PORT}`);
+      const url = await ngrok.connect(PORT);
+      console.log(`Ngrok đang chạy tại ${url}`);
     });
 
   } catch (error) {

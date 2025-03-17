@@ -10,10 +10,10 @@ const apiController = {
         const user = req.user;
 
         // Kiểm tra số dư
-        if (user.balance <= 0 && isAfter(new Date(), user.free_trial_expiry)) {
+        if (isAfter(new Date(), user.free_trial_expiry)) {
             return res.status(400).json({
                 success: false,
-                message: 'Số dư không đủ để tạo API key mới'
+                message: 'Số dư không đủ hoặc hết hạn để tạo API key mới'
             });
         }
 
@@ -201,40 +201,56 @@ const apiController = {
       });
     }
   }, // check Api key
-  async checkApiKey(req, res) {
-    try {
-        const { apiKey } = req.body;
 
-        if (!apiKey) {
-            return res.status(400).json({
-                success: false,
-                message: "Thiếu API key"
-            });
-        }
+async checkApiKey(req, res) {
+  try {
+      const { apiKey } = req.body;
 
-        // Tìm API key trong database
-        const apiKeyData = await ApiKey.findOne({ where: { api_key: apiKey } });
+      // Kiểm tra nếu thiếu API key trong request
+      if (!apiKey) {
+          return res.status(400).json({
+              success: false,
+              message: "Thiếu API key"
+          });
+      }
 
-        if (!apiKeyData) {
-            return res.status(404).json({
-                success: false,
-                message: "API key không tồn tại"
-            });
-        }
+      // Tìm API key trong database
+      const apiKeyData = await ApiKey.findOne({ where: { api_key: apiKey } });
 
-        return res.json({
-            success: true,
-            message: "API key hợp lệ và tồn tại"
-        });
+      // Nếu không tìm thấy API key
+      if (!apiKeyData) {
+          return res.status(404).json({
+              success: false,
+              message: "API key không tồn tại"
+          });
+      }
 
-    } catch (error) {
-        console.error('Lỗi khi kiểm tra API key:', error);
-        return res.status(500).json({
-            success: false,
-            message: "Lỗi khi kiểm tra API key"
-        });
-    }
+      // Kiểm tra nếu gói dùng thử miễn phí đã hết hạn
+      const currentDate = new Date(); // Lấy ngày hiện tại
+      const freeTrialExpiry = new Date(apiKeyData.free_trial_expiry); // Chuyển đổi free_trial_expiry thành đối tượng Date
+      console.log("Free Trial Expiry:", apiKeyData);
+      if (freeTrialExpiry <= currentDate) {
+          return res.status(400).json({
+              success: false,
+              message: "Gói dùng thử miễn phí đã hết hạn"
+          });
+      }
+
+      // Nếu API key hợp lệ và gói dùng thử chưa hết hạn
+      return res.json({
+          success: true,
+          message: "API key hợp lệ và gói dùng thử miễn phí vẫn còn hiệu lực"
+      });
+
+  } catch (error) {
+      console.error('Lỗi khi kiểm tra API key:', error);
+      return res.status(500).json({
+          success: false,
+          message: "Lỗi khi kiểm tra API key"
+      });
+  }
 }
+
 
   
 };

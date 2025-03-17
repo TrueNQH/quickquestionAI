@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme"; // Giả sử bạn đã có hook use-theme
-import Modal from "@/components/Modal"; // Giả sử bạn đã có Modal component
-import QRCode from "react-qr-code"; // Bạn có thể sử dụng thư viện 'react-qr-code' để tạo mã QR
-import axios from 'axios'; // Đảm bảo axios đã được cài đặt
+import Modal from "@/components/Modal"; // Giả sử bạn đã có Modal component // Đảm bảo axios đã được cài đặt
 import api from "../../api/api.config";
 
 function Price() {

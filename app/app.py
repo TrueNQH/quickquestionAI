@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication,QScrollArea,QLineEdit, QRubberBand, QWidget, QVBoxLayout, QLabel, QPushButton, QDialog, QComboBox, QFormLayout, QMessageBox
-from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtGui import QMouseEvent, QIcon
 from PyQt5.QtCore import Qt, QPoint, QRect
 import sys
 import keyboard
@@ -10,7 +10,8 @@ api_results = []  # Lưu kết quả trả về từ API
 api_key=None
 api_url = None  # Lưu trữ API URL từ Google Sheet
 flag=True
-url_server = "https://dc00-2402-800-6205-a6e9-6828-4090-95e2-1d20.ngrok-free.app"
+prompt = "Bạn là một chuyên gia, hãy giải thích kiến thức này cho tôi."
+url_server = "https://048e-2402-800-6205-a6e9-785c-4acf-aa6d-d455.ngrok-free.app"
 # Phím tắt mặc định
 shortcuts = {
     "capture": "Ctrl + Shift + C",
@@ -65,6 +66,7 @@ class ResultDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Kết Quả API")
         self.setGeometry(200, 200, 500, 300)
+        self.setWindowIcon(QIcon('./app96.png'))
         main_layout = QVBoxLayout()
         content_widget = QWidget()
         content_layout = QVBoxLayout()
@@ -88,6 +90,7 @@ class ShortcutSettingsDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Cài đặt phím tắt")
+        self.setWindowIcon(QIcon('./app96.png'))
         self.resize(400, 400)
 
         self.layout = QFormLayout()
@@ -96,7 +99,12 @@ class ShortcutSettingsDialog(QDialog):
         self.api_key_input.setText(api_key)
         
         self.layout.addRow("API Key:", self.api_key_input)
+        
+        self.option_combo = QComboBox()
+        self.option_combo.addItems(["Cung cấp kiến thức", "Trả lời câu hỏi trắc nghiệm"])
+        self.layout.addRow("Chọn chế độ:", self.option_combo)
 
+        
         self.capture_combo = QComboBox()
         self.capture_combo.addItems(["Ctrl + Shift + C", "Ctrl + Alt + C", "C"])
         self.capture_combo.setCurrentText(shortcuts["capture"])
@@ -130,7 +138,7 @@ class ShortcutSettingsDialog(QDialog):
 
     def save_settings(self):
         """Kiểm tra API key trước khi lưu cài đặt"""
-        global api_key, url_server
+        global api_key, url_server, prompt
 
         api_key = self.api_key_input.text().strip()
         if not api_key:
@@ -153,6 +161,7 @@ class ShortcutSettingsDialog(QDialog):
             return  # Không lưu cài đặt nếu có lỗi kết nối
 
         # Nếu API key hợp lệ, lưu cài đặt
+        prompt = self.option_combo.currentText()
         shortcuts["capture"] = self.capture_combo.currentText()
         shortcuts["show_results"] = self.show_results_combo.currentText()
         shortcuts["open_settings"] = self.open_settings_combo.currentText()
@@ -173,7 +182,7 @@ class ShortcutSettingsDialog(QDialog):
         sys.exit()
 
 def send_image_to_api(image_path):
-    global api_url, flag  # Cần khai báo global để thay đổi giá trị
+    global api_url, flag, prompt  # Cần khai báo global để thay đổi giá trị
     if not flag:
         print("⏳ Đang xử lý ảnh trước đó, vui lòng chờ...")
         return
@@ -190,7 +199,8 @@ def send_image_to_api(image_path):
 
     try:
         print("🚀 Đang gửi ảnh đến API...")
-        data = {'api_key': api_key}
+        data = {'api_key': api_key, "prompt": prompt}
+        print(prompt)
         with open(image_path, 'rb') as image_file:
             files = {'image': image_file}
             response = requests.post(api_url, data=data, files=files)

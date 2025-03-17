@@ -30,7 +30,7 @@ export const navbarLinks = [
             {
                 label: "Cài Đặt Tài Khoản",
                 icon: Users,
-                path: "/customers",
+                path: "/dashboard/customer",
             },
             ,
            
@@ -42,7 +42,7 @@ export const navbarLinks = [
             {
                 label: "Settings",
                 icon: Settings,
-                path: "/settings",
+                path: "/dashboard/settings",
             },
         ],
     },

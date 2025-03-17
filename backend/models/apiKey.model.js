@@ -23,11 +23,15 @@ const ApiKey = sequelize.define('ApiKey', {
   status: {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
+  },
+  free_trial_expiry: {
+    type: DataTypes.DATE,
+    allowNull: true, // Cột này có thể là NULL nếu không có giá trị
   }
 }, {
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
 });
 
-module.exports = ApiKey; 
+module.exports = ApiKey;

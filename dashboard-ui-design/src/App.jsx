@@ -28,6 +28,16 @@ function App() {
                     path: "payment",
                     element: <Price/>,
                 },
+                {
+                    path: "settings",
+                    element: <Price/>,
+                },
+                {
+                    path: "customer",
+                    element: <Price/>,
+                },
+                
+               
                 
             ],
         },
